@@ -69,14 +69,43 @@ def tag_set(tags):
     return tag
 
 
+def get_best_instance(correct_tags, current_tags):
+    to_tags = {"JJ", "VB"}
+    rules = []
+    for to_tag in to_tags:
+        num_good_transforms = {}
+        for pos in range(1, len(current_tags)):
+            if correct_tags[pos][1] == to_tag and current_tags[pos][1] == "NN":
+                if current_tags[pos-1][1] in num_good_transforms:
+                    num_good_transforms[current_tags[pos - 1][1]] += 1
+                else:
+                    num_good_transforms[current_tags[pos - 1][1]] = 1
+            elif correct_tags[pos][1] == "NN" and current_tags[pos][1] == "NN":
+                if current_tags[pos-1][1] in num_good_transforms:
+                    num_good_transforms[current_tags[pos - 1][1]] -= 1
+                else:
+                    num_good_transforms[current_tags[pos - 1][1]] = -1
+        print(num_good_transforms)
+        best_Z = max(num_good_transforms, key=num_good_transforms.get)
+        # best_score = 0
+        # if num_good_transforms.get(best_Z) > best_score:
+        best_score = num_good_transforms.get(best_Z)
+        rule = []
+        rule.append("NN")
+        rule.append(to_tag)
+        rule.append(best_Z)
+        print (best_score)
+        rules.append(rule)
+    return rules
+
 if __name__ == "__main__":
     filepath = 'HW2_F18_NLP6320_POSTaggedTrainingSet-Windows.txt'
     f = read_file(filepath)
     correct_tags = preprocess(f)
-    current_tags = corpus_generate(correct_tags)
+    corpus = corpus_generate(correct_tags)
     counted_tokens = token_counter(correct_tags)
     counted_tags = tag_counter(correct_tags)
-    re_tag = retag(current_tags, counted_tags, counted_tokens)
+    current_tags = retag(corpus, counted_tags, counted_tokens)
     tag_set = tag_set(correct_tags)
-    # print (counted_tags)
-    print (tag_set)
+    best = get_best_instance(correct_tags, current_tags)
+    print (best)
