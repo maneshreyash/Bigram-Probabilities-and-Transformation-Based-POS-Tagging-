@@ -72,6 +72,7 @@ def tag_set(tags):
 def get_best_instance(correct_tags, current_tags):
     to_tags = {"JJ", "VB"}
     rules = []
+    best_rule = []
     for to_tag in to_tags:
         num_good_transforms = {}
         for pos in range(1, len(current_tags)):
@@ -85,18 +86,44 @@ def get_best_instance(correct_tags, current_tags):
                     num_good_transforms[current_tags[pos - 1][1]] -= 1
                 else:
                     num_good_transforms[current_tags[pos - 1][1]] = -1
-        print(num_good_transforms)
+        # print(num_good_transforms)
+
         best_Z = max(num_good_transforms, key=num_good_transforms.get)
+        if num_good_transforms.get(best_Z) > 0:
+            new_rule = []
+            new_rule.append('NN')
+            new_rule.append(to_tag)
+            new_rule.append(best_Z)
+            best_rule.append(new_rule)
         # best_score = 0
         # if num_good_transforms.get(best_Z) > best_score:
-        best_score = num_good_transforms.get(best_Z)
         rule = []
         rule.append("NN")
         rule.append(to_tag)
         rule.append(best_Z)
-        print (best_score)
+        rule.append(num_good_transforms)
         rules.append(rule)
-    return rules
+    return rules, best_rule
+
+
+def find_missing(input_sentence, rules):
+    data = input_sentence.split()
+    for i in range(0, len(data)):
+        data[i] = data[i].split('_')
+    # print (data)
+    for i in range(0, len(data)):
+        if data[i][1] == '??':
+            prev_tag = data[i - 1][1]
+            to_vb = rules[0][3].get(prev_tag)
+            to_jj = rules[1][3].get(prev_tag)
+            if to_vb >= to_jj and to_vb > 0:
+                data[i][1] = 'VB'
+            elif to_vb < to_jj and to_jj > 0:
+                data[i][1] = 'JJ'
+            else:
+                data[i][1] = 'NN'
+    return data
+
 
 if __name__ == "__main__":
     filepath = 'HW2_F18_NLP6320_POSTaggedTrainingSet-Windows.txt'
@@ -107,5 +134,9 @@ if __name__ == "__main__":
     counted_tags = tag_counter(correct_tags)
     current_tags = retag(corpus, counted_tags, counted_tokens)
     tag_set = tag_set(correct_tags)
-    best = get_best_instance(correct_tags, current_tags)
-    print (best)
+    rules, best_rule = get_best_instance(correct_tags, current_tags)
+    input_sen = "The_DT standard_?? Turbo_NN engine_NN is_VBZ hard_JJ to_TO work_??"
+    answer = find_missing(input_sen, rules)
+    print (answer)
+    print (best_rule)
+    # print (best)
