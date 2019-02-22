@@ -55,14 +55,14 @@ def bigram_compute(tokens):
             buckets[bigrams.get(bigram)] = 1
     od = sorted(buckets.items(), key=lambda t: t[0])
 
-    bigrams_good = {}
+    # bigrams_good = {}
     for bigram in bigrams:
         bigrams[bigram] = (bigrams.get(bigram) + 1) * od[bigrams.get(bigram)]
 
     print (od)
 
 
-if __name__== "__main__":
+if __name__ == "__main__":
     filepath = 'HW2_F18_NLP6320-NLPCorpusTreebank2Parts-CorpusA-Windows.txt'
     f = read_file(filepath)
     tokens = split_processing(f)
