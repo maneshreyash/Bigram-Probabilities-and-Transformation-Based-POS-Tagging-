@@ -1,6 +1,9 @@
 from __future__ import division
+from collections import OrderedDict
 
-
+# Function to scan the file
+# @param:   path -          specifies the path of the input file
+# @return:  file_content -  scans and returns the contents of the file
 def read_file(path):
     file_content = open(path, "r")
     # print(f.read())
@@ -11,7 +14,6 @@ def read_file(path):
 def split_processing(sentences):
     sentences = sentences.split(" . ")
     for i in range(0, len(sentences)):
-        sentences[i] = sentences[i] + " ."
         sentences[i] = sentences[i].split()
     # print(sentences)
     return sentences
@@ -53,13 +55,20 @@ def bigram_compute(tokens):
             buckets[bigrams.get(bigram)] += 1
         else:
             buckets[bigrams.get(bigram)] = 1
-    od = sorted(buckets.items(), key=lambda t: t[0])
-
-    # bigrams_good = {}
+    od = OrderedDict(sorted(buckets.items()))
+    ol = sorted(buckets.items(), key=lambda t: t[0])
+    c_star = {}
+    for i in range(0, len(ol) - 1):
+        c_star[ol[i][0]] = (ol[i+1][0]) * (od.get((ol[i+1][0]))) / (od.get((ol[i][0])))
+    c_star[ol[len(ol)-1][0]] = ol[len(ol)-1][1]
+    gt_prob = {}
     for bigram in bigrams:
-        bigrams[bigram] = (bigrams.get(bigram) + 1) * od[bigrams.get(bigram)]
-
-    print (od)
+        # print (bigrams.get(bigram))
+        gt_prob[bigram] = c_star.get(bigrams.get(bigram)) / total_bigrams
+    # print (bigrams)
+    print (total_bigrams)
+    print (c_star)
+    print (gt_prob)
 
 
 if __name__ == "__main__":
