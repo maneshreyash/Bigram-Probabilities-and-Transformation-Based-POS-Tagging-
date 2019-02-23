@@ -106,6 +106,8 @@ def get_best_instance(correct_tags, current_tags):
     return rules, best_rule
 
 
+# TODO change code to replace the missing tags initially by most probable tag and
+#  then check ONLY FROM THE BEST LEARNT RULES.
 def find_missing(input_sentence, rules):
     data = input_sentence.split()
     for i in range(0, len(data)):
