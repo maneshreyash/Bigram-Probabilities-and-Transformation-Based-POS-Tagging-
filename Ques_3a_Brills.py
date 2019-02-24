@@ -1,11 +1,17 @@
 
+
+# Function to scan the file
+# @param:   path -          specifies the path of the input file
+# @return:  file_content -  scans and returns the contents of the file
 def read_file(path):
     file_content = open(path, "r")
-    # print(f.read())
     file_content = file_content.read()
     return file_content
 
 
+# Preprocess the scanned file contents
+# @param:   contents -      scanned contents of the file
+# @return:  pairs -         a list of list containing the word and it's corresponding tag
 def preprocess(contents):
     pairs = contents.split()
     for i in range(0, len(pairs)):
@@ -13,6 +19,9 @@ def preprocess(contents):
     return pairs
 
 
+# Generate a corpus consisting of words only stripped of of all their tags
+# @param:   tagged_tokens - The preprocessed data consisting of words and their tags
+# @return:  data-           A corpus consisting of words only stripped of of all their tags
 def corpus_generate(tagged_tokens):
     data = []
     for token in tagged_tokens:
@@ -20,6 +29,9 @@ def corpus_generate(tagged_tokens):
     return data
 
 
+# Generate a dictionary with all words as keys and their count occurrences as values
+# @param:   tags -          The preprocessed data consisting of words and their tags
+# @return:  data -          A dictionary with all words as keys and their count occurrences as values
 def token_counter(tags):
     data = {}
     for token in tags:
@@ -30,6 +42,10 @@ def token_counter(tags):
     return data
 
 
+# Generate a dictionary with all words and the count of their corresponding tags
+# as a map of tag as keys and counts as values.
+# @param:   tags -          The preprocessed data consisting of words and their tags
+# @return:  data -          A dictionary with all tags as keys and their count occurrences as values
 def tag_counter(tags):
     data = {}
     for token in tags:
@@ -47,21 +63,30 @@ def tag_counter(tags):
     return data
 
 
-def retag(inp, tags, tokens):
+# Re-tagging the stripped off corpus with most probable tags by choosing the tag for a word with the highest count.
+# @param:   inp -           input corpus having just the words
+#           tags -          a corpus having words and a map of all their tags and tag counts
+# @return:  retags -        a corpus tagged with their most probable tags also called as current_tags corpus
+def retag(inp, tags):
     retags = []
+
     for i in inp:
         tag_map = tags.get(i)
         max_tags = -1
         tag = ""
+
         for j in tag_map:
             if max_tags < tag_map.get(j):
                 max_tags = tag_map.get(j)
                 tag = j
+
         pair = [i, tag]
         retags.append(pair)
+
     return retags
 
-
+# Create a set of all tags
+# @param:   tags -          a corpus having words and a map of all their tags and tag counts
 def tag_set(tags):
     tag = set()
     for i in tags:
@@ -89,12 +114,11 @@ def get_best_instance(correct_tags, current_tags):
         # print(num_good_transforms)
 
         best_Z = max(num_good_transforms, key=num_good_transforms.get)
-        if num_good_transforms.get(best_Z) > 0:
-            new_rule = []
-            new_rule.append('NN')
-            new_rule.append(to_tag)
-            new_rule.append(best_Z)
-            best_rule.append(new_rule)
+        new_rule = []
+        new_rule.append('NN')
+        new_rule.append(to_tag)
+        new_rule.append(best_Z)
+        best_rule.append(new_rule)
         # best_score = 0
         # if num_good_transforms.get(best_Z) > best_score:
         rule = []
@@ -106,24 +130,38 @@ def get_best_instance(correct_tags, current_tags):
     return rules, best_rule
 
 
-# TODO change code to replace the missing tags initially by most probable tag and
-#  then check ONLY FROM THE BEST LEARNT RULES.
-def find_missing(input_sentence, rules):
+# Parse the input sentence to find the missing tag and replace it with the current tags initially
+# and then see if they can be improved by applying the learned rules.
+# @param:   input_sentence -    The input sentence with missing tags
+#           rules -             The learnt rules from brill's algorithm
+#           current -           the current corpus replaced with most probable tags
+# @return:  data -              The tags that are supposed to be correct for the input sentence
+def find_missing(input_sentence, rules, current):
     data = input_sentence.split()
     for i in range(0, len(data)):
         data[i] = data[i].split('_')
     # print (data)
+
+    # Initialize the missing tags to the most probable tags from the current_tag corpus
+    missing = {}
     for i in range(0, len(data)):
         if data[i][1] == '??':
-            prev_tag = data[i - 1][1]
-            to_vb = rules[0][3].get(prev_tag)
-            to_jj = rules[1][3].get(prev_tag)
-            if to_vb >= to_jj and to_vb > 0:
-                data[i][1] = 'VB'
-            elif to_vb < to_jj and to_jj > 0:
-                data[i][1] = 'JJ'
-            else:
-                data[i][1] = 'NN'
+            for j in range(0, len(current)):
+                if current[j][0] == data[i][0]:
+                    data[i][1] = current[j][1]
+                    missing[data[i][0]] = current[j][1]
+
+    # Check from all possible rules if any of them apply
+    for i in range(0, len(data)):
+
+        if data[i][0] in missing:
+            if missing.get(data[i][0]) == "NN":
+                prev_tag = data[i - 1][1]
+
+                if prev_tag == rules[0][2]:
+                    data[i][1] = rules[0][2]
+                if prev_tag == rules[1][2]:
+                    data[i][1] = rules[1][2]
     return data
 
 
@@ -134,11 +172,20 @@ if __name__ == "__main__":
     corpus = corpus_generate(correct_tags)
     counted_tokens = token_counter(correct_tags)
     counted_tags = tag_counter(correct_tags)
-    current_tags = retag(corpus, counted_tags, counted_tokens)
+    current_tags = retag(corpus, counted_tags)
     tag_set = tag_set(correct_tags)
     rules, best_rule = get_best_instance(correct_tags, current_tags)
     input_sen = "The_DT standard_?? Turbo_NN engine_NN is_VBZ hard_JJ to_TO work_??"
-    answer = find_missing(input_sen, rules)
+    answer = find_missing(input_sen, best_rule, current_tags)
+
+    print ("\n")
+    print ("The best learnt rules from Brill's Algorithm for NN to VB and NN to JJ conversion are as follows: ")
+    print ("[From, To, Previous]")
+    for i in best_rule:
+        print (i)
+
+    print ("\n\n")
+    print ("The output sentence without any missing tags")
+    for i in range(0, len(answer)):
+        answer[i] = answer[i][0] + "_" + answer[i][1]
     print (answer)
-    print (best_rule)
-    # print (best)
