@@ -68,7 +68,7 @@ def bi_gram_compute(token):
     for bi_gram in bi_grams:
         bi_grams_prob[bi_gram] = (bi_grams.get(bi_gram)) / (word_count.get(bi_gram[0]))
         bi_grams_add_one_count[bi_gram] = ((bi_grams.get(bi_gram) + 1) * total_bi_grams) / (total_bi_grams + len(bi_grams))
-        bi_grams_add_one_prob[bi_gram] = (bi_grams.get(bi_gram) + 1) / (word_count.get(bi_gram[0]) + len(bi_grams))
+        bi_grams_add_one_prob[bi_gram] = (bi_grams.get(bi_gram) + 1) / (word_count.get(bi_gram[0]) + len(word_count))
 
     # Creating buckets for good turing smoothing
     buckets = {}
@@ -87,7 +87,10 @@ def bi_gram_compute(token):
     c_star = {}
 
     for i in range(0, len(ol) - 1):
-        c_star[ol[i][0]] = (ol[i+1][0]) * (od.get((ol[i+1][0]))) / (od.get((ol[i][0])))
+        if ol[i][0]+1 in od:
+            c_star[ol[i][0]] = (ol[i][0] + 1) * (od.get((ol[i][0] + 1))) / (od.get((ol[i][0])))
+        else:
+            c_star[ol[i][0]] = 0
     c_star[ol[len(ol)-1][0]] = ol[len(ol)-1][1]
 
     # Computation of good turing probabilities
