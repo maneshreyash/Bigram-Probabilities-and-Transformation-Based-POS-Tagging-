@@ -24,7 +24,6 @@ def split_processing(sentences):
 # BiGram Computations
 # @param:   tokens -        each word separated as a component of a list which represents one sentence.
 #                           A list of such sentence lists.
-# TODO @return value specification as per hand computation requirements
 def bi_gram_compute(token):
 
     # total counts of word occurrences.
@@ -67,7 +66,7 @@ def bi_gram_compute(token):
 
     for bi_gram in bi_grams:
         bi_grams_prob[bi_gram] = (bi_grams.get(bi_gram)) / (word_count.get(bi_gram[0]))
-        bi_grams_add_one_count[bi_gram] = ((bi_grams.get(bi_gram) + 1) * total_bi_grams) / (total_bi_grams + len(bi_grams))
+        bi_grams_add_one_count[bi_gram] = ((bi_grams.get(bi_gram) + 1)*total_bi_grams)/(total_bi_grams + len(bi_grams))
         bi_grams_add_one_prob[bi_gram] = (bi_grams.get(bi_gram) + 1) / (word_count.get(bi_gram[0]) + len(word_count))
 
     # Creating buckets for good turing smoothing
@@ -93,20 +92,76 @@ def bi_gram_compute(token):
             c_star[ol[i][0]] = 0
     c_star[ol[len(ol)-1][0]] = ol[len(ol)-1][1]
 
+    # Calculation of good turing biGram counts
+    gt_counts = {}
+    for i in bi_grams:
+        gt_counts[i] = c_star.get(bi_grams.get(i))
+
     # Computation of good turing probabilities
     gt_prob = {}
 
     for bi_gram in bi_grams:
         gt_prob[bi_gram] = c_star.get(bi_grams.get(bi_gram)) / total_bi_grams
 
-    print (bi_grams)
-    print (bi_grams_prob)
+    # write the counts of biGrams for no smoothing in a file
+    file_bi_gram_count = open("no_smoothing_count.txt", "w")
+    for i in bi_grams:
+        j = ' '.join(i)
+        file_bi_gram_count.write(j)
+        file_bi_gram_count.write(": ")
+        file_bi_gram_count.write(str(bi_grams.get(i)))
+        file_bi_gram_count.write("\n")
+    file_bi_gram_count.close()
 
-    print (bi_grams_add_one_count)
-    print (bi_grams_add_one_prob)
+    # write the probabilities of biGrams for no smoothing in a file
+    file_bi_gram_prob = open("no_smoothing_prob.txt", "w")
+    for i in bi_grams_prob:
+        j = ' '.join(i)
+        file_bi_gram_prob.write(j)
+        file_bi_gram_prob.write(": ")
+        file_bi_gram_prob.write(str(bi_grams_prob.get(i)))
+        file_bi_gram_prob.write("\n")
+    file_bi_gram_prob.close()
 
-    print (c_star)
-    print (gt_prob)
+    # write the counts of biGrams for add one smoothing in a file
+    file_add_one_counts = open("add_one_smoothing_counts.txt", "w")
+    for i in bi_grams_add_one_prob:
+        j = ' '.join(i)
+        file_add_one_counts.write(j)
+        file_add_one_counts.write(": ")
+        file_add_one_counts.write(str(bi_grams_add_one_count.get(i)))
+        file_add_one_counts.write("\n")
+    file_add_one_counts.close()
+
+    # write the probabilities of biGrams for add one smoothing in a file
+    file_add_one_prob = open("add_one_smoothing_prob.txt", "w")
+    for i in bi_grams_add_one_prob:
+        j = ' '.join(i)
+        file_add_one_prob.write(j)
+        file_add_one_prob.write(": ")
+        file_add_one_prob.write(str(bi_grams_add_one_prob.get(i)))
+        file_add_one_prob.write("\n")
+    file_add_one_prob.close()
+
+    # write the counts of biGrams for good turing discounting smoothing in a file
+    file_good_turing_counts = open("good_turing_smoothing_counts.txt", "w")
+    for i in gt_counts:
+        j = ' '.join(i)
+        file_good_turing_counts.write(j)
+        file_good_turing_counts.write(": ")
+        file_good_turing_counts.write(str(gt_counts.get(i)))
+        file_good_turing_counts.write("\n")
+    file_good_turing_counts.close()
+
+    # write the probabilities of biGrams for good turing discounting smoothing in a file
+    file_good_turing_prob = open("good_turing_smoothing_prob.txt", "w")
+    for i in gt_prob:
+        j = ' '.join(i)
+        file_good_turing_prob.write(j)
+        file_good_turing_prob.write(": ")
+        file_good_turing_prob.write(str(gt_prob.get(i)))
+        file_good_turing_prob.write("\n")
+    file_good_turing_prob.close()
 
 
 if __name__ == "__main__":
