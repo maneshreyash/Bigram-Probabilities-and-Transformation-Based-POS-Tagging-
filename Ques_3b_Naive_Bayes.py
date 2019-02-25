@@ -1,3 +1,9 @@
+# IMPLEMENT BIGRAM MODELS TO FEED IN THE REQUIRED VALUES FOR THE FORMULAE OF NAIVE BAYESIAN CLASSIFICATION
+# TO COMPUTE THE PROBABILITY OF THE GIVEN SENTENCE: The_DT standard_?? Turbo_NN engine_NN is_VBZ hard_JJ to_TO work_??
+#
+# @author: Shreyash Sanjay Mane
+
+
 from __future__ import division
 from collections import OrderedDict
 

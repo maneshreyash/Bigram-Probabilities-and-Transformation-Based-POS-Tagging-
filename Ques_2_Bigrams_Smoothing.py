@@ -1,3 +1,11 @@
+# IMPLEMENT THE BIGRAM MODELS FOR THE FOLLOWING 3 METHODS FOR THE GIVEN CORPUS:
+# No Smoothing
+# Add-one Smoothing
+# Good-Turing Discounting based Smoothing
+#
+# @author: Shreyash Sanjay Mane
+
+
 from __future__ import division
 from collections import OrderedDict
 

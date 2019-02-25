@@ -1,3 +1,8 @@
+# IMPLEMENT BRILL'S TAGGING ALGORITHM TO FIND THE BEST POSSIBLE RULES FOR THE FOLLOWING CONVERSIONS:
+# NN --> VB
+# NN --> JJ
+#
+# @author: Shreyash Sanjay Mane
 
 
 # Function to scan the file
